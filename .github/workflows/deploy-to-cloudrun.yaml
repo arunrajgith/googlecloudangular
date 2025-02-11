@@ -37,6 +37,10 @@ jobs:
     - name: Build Docker image
       run: docker build -t asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service .
 
+    - name: Authenticate Docker with Google Artifact Registry
+      run: |
+        gcloud auth configure-docker asia-south1-docker.pkg.dev
+
     - name: Push Docker image to Google Artifact Registry
       run: |
         docker push asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service
