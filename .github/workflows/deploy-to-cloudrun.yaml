@@ -13,23 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # Authenticate with Google Cloud
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    # Set up Cloud SDK
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: gcloud-cicd-angular
 
-    # Set up Node.js
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18' 
+        node-version: '18'
 
     - name: Install Angular CLI
       run: npm install -g @angular/cli  
@@ -39,18 +36,15 @@ jobs:
 
     - name: Build Angular App
       run: ng build --configuration production
-      
-    - name: Build Docker image
-      run: docker build -t asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service .
 
-    # Authenticate Docker with Artifact Registry
+    - name: Build Docker image
+      run: docker build --no-cache -t asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service .
+
     - name: Configure Docker Authentication
-      run: |
-        gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+      run: gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
     - name: Push Docker image to Google Artifact Registry
-      run: |
-        docker push asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service
+      run: docker push asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service
 
     - name: Deploy to Cloud Run
       run: |
@@ -58,4 +52,9 @@ jobs:
           --image asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service \
           --region asia-south1 \
           --platform managed \
-          --allow-unauthenticated
+          --allow-unauthenticated \
+          --port 8080 \
+          --quiet
+
+    - name: Clean Up Docker Images
+      run: docker system prune -f
