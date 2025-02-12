@@ -13,13 +13,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    # Authenticate with Google Cloud
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    # Set up Cloud SDK
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: gcloud-cicd-angular
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
 
+    # Set up Node.js
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
@@ -37,9 +43,10 @@ jobs:
     - name: Build Docker image
       run: docker build -t asia-south1-docker.pkg.dev/gcloud-cicd-angular/gcloud-cicd-angular-service/gcloud-cicd-angular-service .
 
-    - name: Authenticate Docker with Google Artifact Registry
+    # Authenticate Docker with Artifact Registry
+    - name: Configure Docker Authentication
       run: |
-        gcloud auth configure-docker asia-south1-docker.pkg.dev
+        gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
     - name: Push Docker image to Google Artifact Registry
       run: |
