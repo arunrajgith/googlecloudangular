@@ -1,23 +1,16 @@
-# Use official Node.js image as base
+# Build Angular App
 FROM node:18 AS build
-
-# Set working directory
 WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy the rest of the app and build
 COPY . .
-RUN npm run build --configuration=production
+RUN npm install
+RUN npm run build --configuration production
 
-# Use nginx to serve the Angular app
+# Serve with NGINX
 FROM nginx:alpine
 COPY --from=build /app/dist/gcloudcicdangular /usr/share/nginx/html
 
-# Expose port 8080
+# Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Force NGINX to listen on port 8080
+CMD ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf"]
