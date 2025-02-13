@@ -8,9 +8,10 @@ RUN npm run build --configuration production
 # Serve with NGINX
 FROM nginx:alpine
 COPY --from=build /app/dist/gcloudcicdangular /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Force NGINX to listen on port 8080
-CMD ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf"]
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
